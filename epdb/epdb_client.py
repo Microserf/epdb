@@ -143,8 +143,18 @@ class TelnetClient(telnetlib.Telnet):
                         print('*** Connection closed by remote host ***')
                         break
                     if text:
-                        sys.stdout.write(text.decode('utf-8'))
+                        try:
+                            decoded = text.decode('utf-8')
+                        except UnicodeDecodeError:
+                            decoded = (
+                                '\n\n\n\n-------\n\n\n\n' +
+                                text.decode('base64','strict') +
+                                '\n\n\n\n-------\n\n\n\n'
+                            )
+
+                        sys.stdout.write(decoded)
                         sys.stdout.flush()
+
                 if sys.stdin in readyReaders and self in readyWriters:
                     line = sys.stdin.read(4096)
                     if not line:
